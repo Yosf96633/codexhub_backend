@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "watcher": "ts-node-dev --respawn --transpile-only watcher.ts",
+    "watcher": "ts-node-dev --respawn --transpile-only src/utils/watcher.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },
@@ -14,11 +14,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
+    "amqplib": "^0.10.8",
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
     "express": "^5.1.0"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.7",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.15",
     "ts-node-dev": "^2.0.0",

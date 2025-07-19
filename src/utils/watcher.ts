@@ -1,5 +1,6 @@
 import chokidar from "chokidar";
 import path from "path";
+import { sendToQueue } from "./mq";
 
 const outputDir = path.join(__dirname, "output");
 
@@ -10,7 +11,9 @@ const watcher = chokidar.watch(outputDir, {
   depth: 0,
 });
 
-watcher.on("addDir", (folderPath) => {
+watcher.on("addDir", async (folderPath) => {
   const folderName = path.basename(folderPath);
-  console.log(`📦 New repo folder created: ${folderName}`);
+  console.log("Folder Path -> , " , folderPath);
+    console.log("Folder Name -> , " , folderName);
+  await sendToQueue(folderPath);
 });
