@@ -1,0 +1,67 @@
+# Node modules
+node_modules/
+
+# Output from TypeScript
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv environment variables
+.env
+.env.*
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sw?
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+
+# Git clone output folders
+output/
+uploads/
+clones/
+repos/
+
+# Coverage reports
+coverage/
+
+# Runtime files
+*.pid
+*.seed
+*.pid.lock
+
+# PM2 process file
+pids.json
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# Bun files (if using Bun)
+.bun/
+
+# Misc
+*.tgz
+*.bak
+*.orig
+*.swp
+
+# TypeScript build cache (optional)
+.cache/
