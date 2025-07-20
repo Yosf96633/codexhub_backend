@@ -1,10 +1,7 @@
 import amqp from 'amqplib';
 const QUEUE_NAME = 'code_folders';
 import dotenv from 'dotenv';
-import path from 'path';
-dotenv.config({ path: path.resolve(__dirname, '../../../embedder/.env') });
-console.log('🔑 OpenAI Key loaded:', process.env.OPENAI_API_KEY ? '✅ Yes' : '❌ No');
-
+import {fun} from '../../../embedding-worker/src/index'
 async function startWorker() {
   try {
     const connection = await amqp.connect('amqp://localhost'); 
@@ -20,6 +17,8 @@ async function startWorker() {
         if (msg !== null) {
           const messageContent = msg.content.toString();
           console.log(`📥 Received message from queue: ${messageContent}`);
+          //spin up docker container.
+           fun();
           channel.ack(msg); 
         }
       },
