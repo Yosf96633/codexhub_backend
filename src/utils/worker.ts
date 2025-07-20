@@ -1,6 +1,5 @@
 import amqp from 'amqplib';
 const QUEUE_NAME = 'code_folders';
-import {processRepo} from "../../../embedder/src/process"
 import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../../embedder/.env') });
@@ -21,7 +20,6 @@ async function startWorker() {
         if (msg !== null) {
           const messageContent = msg.content.toString();
           console.log(`📥 Received message from queue: ${messageContent}`);
-          await processRepo(messageContent);
           channel.ack(msg); 
         }
       },
