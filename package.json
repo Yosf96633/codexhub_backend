@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.7",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.15",
     "ts-node-dev": "^2.0.0",

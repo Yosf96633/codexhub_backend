@@ -5,17 +5,19 @@ import path from "path";
 const app = express();
 import { OpenAI } from "openai";
 import axios from "axios";
-import cors from "cors"
+import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const PORT = process.env.PORT || 8000;
-app.use(cors({
-   origin: "http://localhost:3000", 
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Hello from Express + TypeScript + PNPM!");
@@ -32,7 +34,6 @@ app.post("/api/chat", async (req, res) => {
     });
 
     const userEmbedding = embeddingRes.data[0].embedding;
-
     // Step 2: Search Qdrant
     const qdrantSearch = await axios.post(
       "http://localhost:6333/collections/codebase/points/search",
@@ -40,18 +41,36 @@ app.post("/api/chat", async (req, res) => {
         vector: userEmbedding,
         top: 5,
         with_payload: true,
+        filter: {
+          must: [{ key: "user_id", match: { value: "user_123" } }],
+        },
       }
     );
+   const context = qdrantSearch.data.result
+  .map((item) => {
+    const preview = item.payload?.preview || "";
+    const filePath = item.payload?.file_path || "unknown file";
+    const startLine = item.payload?.start_line ?? "?";
+    const endLine = item.payload?.end_line ?? "?";
 
-    const context = qdrantSearch.data.result
-      .map((item) => item.payload?.text || "")
-      .join("\n");
+    return `File: ${filePath}\nLines: ${startLine}-${endLine}\n${preview}`;
+  })
+  .join("\n\n");
+
+
 
     // Step 3: Send context + prompt to OpenAI (with stream)
-    const systemPrompt = `
+   const systemPrompt = `
 You are a codebase assistant. ONLY answer questions using the context provided below.
 If the answer is not in the context, respond with:
 "I don't have enough information to answer that."
+
+Each context snippet will include:
+- File path
+- Start and end line numbers
+- Code preview
+
+Use this information to refer to specific files and lines when answering.
 
 Context:
 \`\`\`
