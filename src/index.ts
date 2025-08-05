@@ -1,12 +1,15 @@
 import express from "express";
 import { Request, Response } from "express";
 import { exec } from "child_process";
+import { spawn } from "child_process";
 import path from "path";
 const app = express();
 import { OpenAI } from "openai";
 import axios from "axios";
 import cors from "cors";
 import dotenv from "dotenv";
+import { connectDB } from "./utils/connectDB";
+import userRouter from "./routes/user.route"
 dotenv.config();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -113,32 +116,51 @@ app.post("/api/url", async (req: Request, res: Response) => {
 
   console.log("📥 Received GitHub link:", github_link);
 
-  const outputDir = path.join(process.cwd(), "output");
-  const dockerCommand = `docker run -e REPO_URL=${github_link} -v "${outputDir.replace(
-    /\\/g,
-    "/"
-  )}:/app/output" github-cloner`;
+  const outputDir = path.join(process.cwd(), "output").replace(/\\/g, "/");
+  const dockerArgs = [
+    "run",
+    "--rm",
+    "-e",
+    `REPO_URL=${github_link}`,
+    "-v",
+    `${outputDir}:/app/output`,
+    "github-cloner",
+  ];
 
-  console.log("🚀 Running Docker command:\n", dockerCommand);
+  console.log("🚀 Running Docker with args:\n", dockerArgs.join(" "));
 
-  exec(dockerCommand, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`❌ Error: ${error.message}`);
-      return res
-        .status(500)
-        .json({ error: "Docker command failed", details: error.message });
+  const docker = spawn("docker", dockerArgs);
+
+  let stdoutData = "";
+  let stderrData = "";
+
+  docker.stdout.on("data", (data) => {
+    stdoutData += data.toString();
+  });
+
+  docker.stderr.on("data", (data) => {
+    stderrData += data.toString();
+  });
+
+  docker.on("close", (code) => {
+    console.log(`🛑 Docker container exited with code: ${code}`);
+    if (code === 0) {
+      res.status(200).json({
+        success: true,
+        message: "Docker task completed successfully",
+        output: stdoutData,
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Docker task failed",
+        error: stderrData || "Unknown error",
+      });
     }
-
-    if (stderr) {
-      console.warn(`⚠️ Stderr: ${stderr}`);
-    }
-
-    console.log(`✅ Docker Output:\n${stdout}`);
-    return res
-      .status(200)
-      .json({ message: "Docker task completed successfully", output: stdout });
   });
 });
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.use("/api/v1/user" , userRouter)
+app.listen(8000, async () => {
+  console.log("🚀 Server running on http://localhost:8000");
+  await connectDB();
 });
