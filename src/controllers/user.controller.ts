@@ -49,7 +49,8 @@ export const loginUser = async (req: Request, res: Response) => {
         .status(400)
         .json({ status: false, message: "Account not found!" });
     }
-    const isCorrect = bcryptjs.compare(password, user.password!);
+    const {password:userPassword} = user
+    const isCorrect =  await bcryptjs.compare(password, userPassword!);
     if (!isCorrect) {
       return res
         .status(400)

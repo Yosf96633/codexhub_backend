@@ -159,7 +159,7 @@ app.post("/api/url", async (req: Request, res: Response) => {
     }
   });
 });
-app.use("/api/v1/user" , userRouter)
+app.use("/api/v1/users" , userRouter)
 app.listen(8000, async () => {
   console.log("🚀 Server running on http://localhost:8000");
   await connectDB();
