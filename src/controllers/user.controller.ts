@@ -31,7 +31,9 @@ export const createUser = async (req: Request, res: Response) => {
       .status(201)
       .json({ success: true, message: "Sign up successful!" });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error });
   }
 };
 
@@ -49,8 +51,8 @@ export const loginUser = async (req: Request, res: Response) => {
         .status(400)
         .json({ status: false, message: "Account not found!" });
     }
-    const {password:userPassword} = user
-    const isCorrect =  await bcryptjs.compare(password, userPassword!);
+    const { password: userPassword } = user;
+    const isCorrect = await bcryptjs.compare(password, userPassword!);
     if (!isCorrect) {
       return res
         .status(400)
@@ -58,6 +60,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
     const accessToken = jwt.sign(
       {
+        id: user._id,
         name: user.username,
         email: user.email,
       },
@@ -70,12 +73,28 @@ export const loginUser = async (req: Request, res: Response) => {
       maxAge: 1000 * 60 * 60 * 24 * 1,
     });
     let { username, email: emailAddress } = user;
+    return res.status(200).json({
+      success: true,
+      data: { username, email: emailAddress },
+      message: "Login successfull!",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie("accessToken");
+    const username = req.user?.username;
     return res
       .status(200)
-      .json({
-        success: true,
-        data: { username, email: emailAddress },
-        message: "Login successfull!",
-      });
-  } catch (error) {}
+      .json({ success: true, message: `${username} logout successfully` });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error });
+  }
 };

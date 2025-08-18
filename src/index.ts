@@ -10,6 +10,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/connectDB";
 import userRouter from "./routes/user.route"
+import cookie_parser from "cookie-parser"
 dotenv.config();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -22,6 +23,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookie_parser())
 app.get("/", (req, res) => {
   res.send("Hello from Express + TypeScript + PNPM!");
 });
